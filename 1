@@ -1,0 +1,128 @@
+from flask import Flask, request, render_template
+from flask_sqlalchemy import SQLAlchemy
+import requests
+import json
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@localhost/database'
+db = SQLAlchemy(app)
+
+# Define the Zoho CRM prospect model
+class ZohoProspect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(80))
+    secondname = db.Column(db.String(80))
+    emailid = db.Column(db.String(120), unique=True)
+    company = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+    invite_sent = db.Column(db.Boolean, default=False)
+    invite_accepted = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return '<ZohoProspect %r>' % self.emailid
+
+# Define the LinkedIn prospect model
+class LinkedInProspect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(80))
+    secondname = db.Column(db.String(80))
+    emailid = db.Column(db.String(120), unique=True)
+    company = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+    invite_sent = db.Column(db.Boolean, default=False)
+    invite_accepted = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return '<LinkedInProspect %r>' % self.emailid
+
+# Define the routes for the web tool
+@app.route('/')
+def index():
+    # Retrieve the prospect list from Zoho CRM
+    zoho_prospects = ZohoProspect.query.all()
+    return render_template('index.html', zoho_prospects=zoho_prospects)
+
+@app.route('/search', methods=['POST'])
+def search():
+    # Retrieve the search criteria from the form
+    firstname = request.form['firstname']
+    secondname = request.form['secondname']
+    emailid = request.form['emailid']
+    company = request.form['company']
+    location = request.form['location']
+
+    # Search for prospects in LinkedIn using the search criteria
+    linkedin_prospects = []
+    # Use the LinkedIn API to search for prospects
+    # Filter the results to match the search criteria
+    for prospect in linkedin_prospects:
+        # Send a connection invite to the prospect with a personal note from a Word document
+        # Add a custom tag to the prospect in Zoho CRM to indicate that an invite has been sent
+        zoho_prospect = ZohoProspect.query.filter_by(emailid=prospect.emailid).
+# Code for sending connection invite and adding a custom tag in Zoho CRM
+def send_connection_invite(profile_url, personal_note, prospect_id):
+    # Use LinkedIn API to send a connection invite
+    # ...
+
+    # Add custom tag in Zoho CRM
+    zoho_api_key = 'your_zoho_api_key'
+    zoho_auth_token = 'your_zoho_auth_token'
+    zoho_crm_module = 'Leads'
+    zoho_record_id = prospect_id
+    zoho_custom_tag = 'Sent Connection Invite'
+
+    zoho_crm_url = f'https://www.zohoapis.com/crm/v2/{zoho_crm_module}/{zoho_record_id}'
+    zoho_headers = {
+        'Authorization': f'Zoho-oauthtoken {zoho_auth_token}',
+        'Content-Type': 'application/json'
+    }
+    zoho_payload = {
+        'data': [
+            {
+                'Custom_Tag': zoho_custom_tag
+            }
+        ]
+    }
+
+    zoho_response = requests.put(zoho_crm_url, headers=zoho_headers, json=zoho_payload)
+
+    if zoho_response.status_code == 200:
+        print(f'Custom tag "{zoho_custom_tag}" added to Zoho CRM record "{zoho_record_id}"')
+    else:
+        print('Error adding custom tag to Zoho CRM record')
+
+
+# Code for sending second custom message and adding a custom tag in Zoho CRM
+def send_second_message(prospect_id):
+    # Check if connection invite has been accepted
+    # ...
+
+    # Use LinkedIn API to send second message
+    # ...
+
+    # Add custom tag in Zoho CRM
+    zoho_api_key = 'your_zoho_api_key'
+    zoho_auth_token = 'your_zoho_auth_token'
+    zoho_crm_module = 'Leads'
+    zoho_record_id = prospect_id
+    zoho_custom_tag = 'Connection Accepted'
+
+    zoho_crm_url = f'https://www.zohoapis.com/crm/v2/{zoho_crm_module}/{zoho_record_id}'
+    zoho_headers = {
+        'Authorization': f'Zoho-oauthtoken {zoho_auth_token}',
+        'Content-Type': 'application/json'
+    }
+    zoho_payload = {
+        'data': [
+            {
+                'Custom_Tag': zoho_custom_tag
+            }
+        ]
+    }
+
+    zoho_response = requests.put(zoho_crm_url, headers=zoho_headers, json=zoho_payload)
+
+    if zoho_response.status_code == 200:
+        print(f'Custom tag "{zoho_custom_tag}" added to Zoho CRM record "{zoho_record_id}"')
+    else:
+        print('Error adding custom tag to Zoho CRM record')
